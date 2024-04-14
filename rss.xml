@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<rss version="2.0">
+    <channel>
+        <title> </title>
+        <subtitle>Never hack for profit</subtitle>
+        <icon>https://ctf-learner.github.io/assets/favicon.ico</icon>
+        <link>https://ctf-learner.github.io</link>
+        <author>
+          <name>MorIo24</name>
+        </author>
+        <description>Never hack for profit</description>
+        <language>zh-CN</language>
+        <pubDate>Wed, 10 Apr 2024 11:50:46 +0800</pubDate>
+        <lastBuildDate>Wed, 10 Apr 2024 11:50:46 +0800</lastBuildDate>
+        <category term="CTF" />
+        <category term="web" />
+        <category term="bypass" />
+        <category term="AWD" />
+        <category term="" />
+        <item>
+            <guid isPermalink="true">https://ctf-learner.github.io/20240410%E6%90%AD%E5%8D%9A%E5%AE%A2%E4%B8%80%E8%B7%AF%E7%9A%84%E5%BF%83%E9%85%B8/</guid>
+            <title>搭博客一路的心酸</title>
+            <link>https://ctf-learner.github.io/20240410%E6%90%AD%E5%8D%9A%E5%AE%A2%E4%B8%80%E8%B7%AF%E7%9A%84%E5%BF%83%E9%85%B8/</link>
+            <category term="关于shokaX" scheme="https://ctf-learner.github.io/categories/%E5%85%B3%E4%BA%8EshokaX/" />
+            <category term="daily" scheme="https://ctf-learner.github.io/tags/daily/" />
+            <category term="nodejs" scheme="https://ctf-learner.github.io/tags/nodejs/" />
+            <pubDate>Wed, 10 Apr 2024 11:50:46 +0800</pubDate>
+            <description><![CDATA[ &lt;h1 id=&#34;搭建博客一路的心酸&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#搭建博客一路的心酸&#34;&gt;#&lt;/a&gt; 搭建博客一路的心酸&lt;/h1&gt;
+&lt;p&gt;第一个拦路虎就是&lt;strong&gt; hexo init&lt;/strong&gt;&lt;br /&gt;
+ 卡住了无数次…… 耐心不够用了，都怀疑是不是 git bash 坏掉了&lt;br /&gt;
+最后换源再 &lt;code&gt;npm hexo init&lt;/code&gt; &lt;br /&gt;
+ 长舒一口气&lt;/p&gt;
+&lt;p&gt;在安装前已经修改了 nodejs 的权限问题&lt;/p&gt;
+&lt;h3 id=&#34;powershell的脚本运行问题&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#powershell的脚本运行问题&#34;&gt;#&lt;/a&gt; powershell 的脚本运行问题&lt;/h3&gt;
+&lt;p&gt;若直接运行 hexo 会报这样的错误&lt;br /&gt;
+&lt;img loading=&#34;lazy&#34; data-src=&#34;/images/%E6%90%AD%E5%8D%9A%E5%AE%A2%E4%B8%80%E8%B7%AF%E7%9A%84%E5%BF%83%E9%85%B8/24-04-10-2.png&#34; alt=&#34;err&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;设置 - 系统 - 开发者选项&lt;br /&gt;
+ &amp;quot;允许本地 powershell 脚本在未签名的情况下允许&amp;quot; 选择开启&lt;br /&gt;
+&lt;img loading=&#34;lazy&#34; data-src=&#34;/images/%E6%90%AD%E5%8D%9A%E5%AE%A2%E4%B8%80%E8%B7%AF%E7%9A%84%E5%BF%83%E9%85%B8/24-04-10-1.png&#34; alt=&#34;设置-系统-开发者选项&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;躲不掉的还是err&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#躲不掉的还是err&#34;&gt;#&lt;/a&gt; 躲不掉的还是 ERR！&lt;/h3&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;/images/%E6%90%AD%E5%8D%9A%E5%AE%A2%E4%B8%80%E8%B7%AF%E7%9A%84%E5%BF%83%E9%85%B8/24-04-10-3.png&#34; alt=&#34;&amp;quot;每次npm install时的噩梦&amp;quot;&#34; title=&#34;npm ERR! Cannot read properties of null (reading &#39;matches&#39;)&#34; /&gt;&lt;br /&gt;
+&lt;strong&gt;npm ERR! Cannot read properties of null (reading &#39;matches&#39;)&lt;/strong&gt;&lt;br /&gt;
+ 网上面对这个报错的做法是&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;npm&lt;/span&gt; cache clean &lt;span class=&#34;token parameter variable&#34;&gt;--force&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;或者二傻子GPT说&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;npm&lt;/span&gt; &lt;span class=&#34;token function&#34;&gt;install&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-g&lt;/span&gt; &lt;span class=&#34;token function&#34;&gt;npm&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;也有的说删除 &lt;code&gt;package-lock.json&lt;/code&gt;  删除 &lt;code&gt;node-modules&lt;/code&gt;  的，但是没有 lock……&lt;br /&gt;
+ 尝试了换源，似乎还是没什么卵用……&lt;br /&gt;
+ 最后用 cnpm 才成功下载……💔&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;npm&lt;/span&gt; &lt;span class=&#34;token function&#34;&gt;install&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-g&lt;/span&gt; cnpm&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;命令丢这下次好拿 (cnpm 换源的命令相同)&lt;/p&gt;
+&lt;figure class=&#34;highlight url&#34;&gt;&lt;figcaption data-lang=&#34;url&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token path&#34;&gt;npm&lt;/span&gt; 官方镜像网址:   https://registry.npmjs.org/&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;淘宝 NPM 镜像：     https://registry.npm.taobao.org&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;阿里云 NPM 镜像：   https://npm.aliyun.com&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;腾讯云 NPM 镜像：   https://mirrors.cloud.tencent.com/npm/&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;华为云 NPM 镜像：   https://mirrors.huaweicloud.com/repository/npm/&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;网易 NPM 镜像：     https://mirrors.163.com/npm/&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;中国科学技术大学开源镜像站：http://mirrors.ustc.edu.cn/&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;8&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;清华大学开源镜像站：https://mirrors.tuna.tsinghua.edu.cn/&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;9&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;腾讯，华为，阿里的镜像站基本上比较全&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;npm&lt;/span&gt; config &lt;span class=&#34;token builtin class-name&#34;&gt;set&lt;/span&gt; registry &lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;url&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 设置镜像仓库&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;npm&lt;/span&gt; config get registry&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 查看当前镜像仓库&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h3 id=&#34;相对路径问题&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#相对路径问题&#34;&gt;#&lt;/a&gt; 相对路径问题&lt;/h3&gt;
+&lt;p&gt;看各路 hexo 教程在说相对路径时候都一脸蒙&lt;br /&gt;
+学 Linux 时候相对路径是./ 开头，或者绝对路径根目录 / 开头&lt;br /&gt;
+但是教程上谈到发布文章的相对路径都是 / 开头&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;先看看官网的解释&lt;br /&gt;
+相对地址&lt;br /&gt;
+默认情况下，Hexo 生成的超链接都是绝对地址。例如，如果您的网站域名为 &lt;a href=&#34;http://example.com&#34;&gt;example.com&lt;/a&gt;，您有一篇文章名为 hello，那么绝对链接可能像这样：&lt;a href=&#34;http://example.com/hello.html%EF%BC%8C%E5%AE%83%E6%98%AF%E7%BB%9D%E5%AF%B9%E4%BA%8E%E5%9F%9F%E5%90%8D%E7%9A%84%E3%80%82%E7%9B%B8%E5%AF%B9%E9%93%BE%E6%8E%A5%E5%83%8F%E8%BF%99%E6%A0%B7%EF%BC%9A/hello.html%EF%BC%8C%E4%B9%9F%E5%B0%B1%E6%98%AF%E8%AF%B4%EF%BC%8C%E6%97%A0%E8%AE%BA%E7%94%A8%E4%BB%80%E4%B9%88%E5%9F%9F%E5%90%8D%E8%AE%BF%E9%97%AE%E8%AF%A5%E7%AB%99%E7%82%B9%EF%BC%8C%E9%83%BD%E6%B2%A1%E6%9C%89%E5%85%B3%E7%B3%BB%EF%BC%8C%E8%BF%99%E5%9C%A8%E8%BF%9B%E8%A1%8C%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E6%97%B6%E5%8F%AF%E8%83%BD%E7%94%A8%E5%88%B0%E3%80%82%E9%80%9A%E5%B8%B8%E6%83%85%E5%86%B5%E4%B8%8B%EF%BC%8C%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8%E7%BB%9D%E5%AF%B9%E5%9C%B0%E5%9D%80%E3%80%82&#34;&gt;http://example.com/hello.html，它是绝对于域名的。相对链接像这样：/hello.html，也就是说，无论用什么域名访问该站点，都没有关系，这在进行反向代理时可能用到。通常情况下，建议使用绝对地址。&lt;/a&gt;&lt;br /&gt;
+这里相对路径其实指的网站的根目录&lt;br /&gt;
+在 hexo g 之后生成的 public 目录会在 hexo d 部署到网站上&lt;br /&gt;
+那么相对路径指的就是以 public 目录为起始 /&lt;br /&gt;
+&lt;img loading=&#34;lazy&#34; data-src=&#34;/images/%E6%90%AD%E5%8D%9A%E5%AE%A2%E4%B8%80%E8%B7%AF%E7%9A%84%E5%BF%83%E9%85%B8/24-04-10-4.png&#34; alt=&#34;public文件夹&#34; /&gt;&lt;br /&gt;
+如果还是定位不到图片的地址，就把图片和文章放一起 hexo g 之后看结果&lt;br /&gt;
+然后就知道图片的地址该怎么写了&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h4 id=&#34;nrm管理&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#nrm管理&#34;&gt;#&lt;/a&gt; nrm 管理&lt;/h4&gt;
+&lt;p&gt;nrm 是一个 npm 源管理器，允许你快速地在 npm 源间切换&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;npm&lt;/span&gt; &lt;span class=&#34;token function&#34;&gt;install&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-g&lt;/span&gt; nrm&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 安装 nrm 源管理工具&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;nrm &lt;span class=&#34;token function&#34;&gt;ls&lt;/span&gt;    &lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 查看可选的源&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;nrm use &lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;options&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 切换源&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;nrm &lt;span class=&#34;token builtin class-name&#34;&gt;test&lt;/span&gt;     &lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;8&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 测试速度&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h4 id=&#34;nvm-node多版本管理&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#nvm-node多版本管理&#34;&gt;#&lt;/a&gt; nvm node 多版本管理&lt;/h4&gt;
+&lt;p&gt;安装和使用参考&lt;a href=&#34;http://t.csdnimg.cn/B42dl&#34;&gt;这里&lt;/a&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;参考链接&lt;br /&gt;
+&lt;a href=&#34;http://t.csdnimg.cn/WNDXm&#34;&gt; http://t.csdnimg.cn/WNDXm&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+ ]]></description>
+        </item>
+    </channel>
+</rss>
