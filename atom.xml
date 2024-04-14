@@ -8,17 +8,33 @@
     <author>
       <name>MorIo24</name>
     </author>
-    <updated>2024-04-10T03:50:46.000Z</updated>
+    <updated>2024-04-14T04:40:23.000Z</updated>
     <category term="CTF" />
     <category term="web" />
     <category term="bypass" />
     <category term="AWD" />
     <category term="" />
     <entry>
+        <id>https://ctf-learner.github.io/20240414AWD%E5%88%9D%E4%BD%93%E9%AA%8C/</id>
+        <title>AWD初体验</title>
+        <link rel="alternate" href="https://ctf-learner.github.io/20240414AWD%E5%88%9D%E4%BD%93%E9%AA%8C/"/>
+        <content type="html">&lt;p&gt;被打爆了，learning~~&lt;br /&gt;
+ 等待作者更新吧&lt;/p&gt;
+</content>
+        <category term="AWD" scheme="https://ctf-learner.github.io/categories/AWD/" />
+        <category term="Attack and Defence" scheme="https://ctf-learner.github.io/tags/Attack-and-Defence/" />
+        <category term="kali tools" scheme="https://ctf-learner.github.io/tags/kali-tools/" />
+        <updated>2024-04-14T04:40:23.000Z</updated>
+    </entry>
+    <entry>
         <id>https://ctf-learner.github.io/20240410%E6%90%AD%E5%8D%9A%E5%AE%A2%E4%B8%80%E8%B7%AF%E7%9A%84%E5%BF%83%E9%85%B8/</id>
         <title>搭博客一路的心酸</title>
         <link rel="alternate" href="https://ctf-learner.github.io/20240410%E6%90%AD%E5%8D%9A%E5%AE%A2%E4%B8%80%E8%B7%AF%E7%9A%84%E5%BF%83%E9%85%B8/"/>
-        <content type="html">&lt;h1 id=&#34;搭建博客一路的心酸&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#搭建博客一路的心酸&#34;&gt;#&lt;/a&gt; 搭建博客一路的心酸&lt;/h1&gt;
+        <content type="html">&lt;p&gt;一开始一眼相中了 shoka 主题的样式，谁料到后来搬石头砸了自己的脚。&lt;br /&gt;
+部署到一半发现 shoka 有了升级版 shokaX，只得重新来过&lt;br /&gt;
+随后 &lt;code&gt;npm install&lt;/code&gt;  反复报错，真是头大&lt;br /&gt;
+在配置图片时候又发现用 images.yml 的相对路径加载不到。&lt;br /&gt;
+换了图床后 images.yml 也没加载成功……😑😰&lt;/p&gt;
 &lt;p&gt;第一个拦路虎就是&lt;strong&gt; hexo init&lt;/strong&gt;&lt;br /&gt;
  卡住了无数次…… 耐心不够用了，都怀疑是不是 git bash 坏掉了&lt;br /&gt;
 最后换源再 &lt;code&gt;npm hexo init&lt;/code&gt; &lt;br /&gt;
@@ -30,7 +46,7 @@
 &lt;p&gt;设置 - 系统 - 开发者选项&lt;br /&gt;
  &amp;quot;允许本地 powershell 脚本在未签名的情况下允许&amp;quot; 选择开启&lt;br /&gt;
 &lt;img loading=&#34;lazy&#34; data-src=&#34;/images/%E6%90%AD%E5%8D%9A%E5%AE%A2%E4%B8%80%E8%B7%AF%E7%9A%84%E5%BF%83%E9%85%B8/24-04-10-1.png&#34; alt=&#34;设置-系统-开发者选项&#34; /&gt;&lt;/p&gt;
-&lt;h3 id=&#34;躲不掉的还是err&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#躲不掉的还是err&#34;&gt;#&lt;/a&gt; 躲不掉的还是 ERR！&lt;/h3&gt;
+&lt;h3 id=&#34;躲不掉的还是npm-err&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#躲不掉的还是npm-err&#34;&gt;#&lt;/a&gt; 躲不掉的还是 npm ERR！&lt;/h3&gt;
 &lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;/images/%E6%90%AD%E5%8D%9A%E5%AE%A2%E4%B8%80%E8%B7%AF%E7%9A%84%E5%BF%83%E9%85%B8/24-04-10-3.png&#34; alt=&#34;&amp;quot;每次npm install时的噩梦&amp;quot;&#34; title=&#34;npm ERR! Cannot read properties of null (reading &#39;matches&#39;)&#34; /&gt;&lt;br /&gt;
 &lt;strong&gt;npm ERR! Cannot read properties of null (reading &#39;matches&#39;)&lt;/strong&gt;&lt;br /&gt;
  网上面对这个报错的做法是&lt;/p&gt;
@@ -52,6 +68,28 @@
 &lt;img loading=&#34;lazy&#34; data-src=&#34;/images/%E6%90%AD%E5%8D%9A%E5%AE%A2%E4%B8%80%E8%B7%AF%E7%9A%84%E5%BF%83%E9%85%B8/24-04-10-4.png&#34; alt=&#34;public文件夹&#34; /&gt;&lt;br /&gt;
 如果还是定位不到图片的地址，就把图片和文章放一起 hexo g 之后看结果&lt;br /&gt;
 然后就知道图片的地址该怎么写了&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;imagesyml图片加载不到问题&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#imagesyml图片加载不到问题&#34;&gt;#&lt;/a&gt; images.yml 图片加载不到问题&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;官方配置文档：&lt;a href=&#34;https://docs.kaitaku.xyz/guide/theme.html#%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BD%91%E7%AB%99%E8%BD%AE%E6%92%AD%E5%9B%BE&#34;&gt;https://docs.kaitaku.xyz/guide/theme.html# 自定义网站轮播图&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;但是本地测试的时候发现，images.yml 中使用相对路径图片没有加载，于是按照文档说明，分别在&lt;/p&gt;
+&lt;ul class=&#34;lvl-0&#34;&gt;
+&lt;li class=&#34;lvl-2&#34;&gt;
+&lt;p&gt;主题文件夹下_images_index.yml&lt;/p&gt;
+&lt;/li&gt;
+&lt;li class=&#34;lvl-2&#34;&gt;
+&lt;p&gt;source/_data/images_index.yml&lt;/p&gt;
+&lt;/li&gt;
+&lt;li class=&#34;lvl-2&#34;&gt;
+&lt;p&gt;source/_data/images.yml&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这些位置都&lt;strong&gt;没有成功&lt;/strong&gt;加载网站背景图片。&lt;br /&gt;
+&lt;strong&gt;&lt;mark&gt;解决方案&lt;/mark&gt;&lt;/strong&gt;&lt;br /&gt;
+直接修改 &lt;code&gt;主题文件夹下_images_index.yml&lt;/code&gt; ，即 &lt;code&gt;/theme/shohaX/images.yml&lt;/code&gt; 。按照官方文档 SXC 的下载方式，主题文件夹在 &lt;code&gt;/node_modules/hexo-theme-shokaX/images.yml&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;心里话：真是给我累吐血了&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h4 id=&#34;nrm管理&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#nrm管理&#34;&gt;#&lt;/a&gt; nrm 管理&lt;/h4&gt;
 &lt;p&gt;nrm 是一个 npm 源管理器，允许你快速地在 npm 源间切换&lt;/p&gt;
