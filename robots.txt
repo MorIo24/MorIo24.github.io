@@ -17,5 +17,5 @@ Disallow: /vendors/
 Disallow: /fancybox/
 Disallow: /about/
 
-Sitemap: Sitemap: https://ctf-learner.github.io/sitemap.xml
-Sitemap: Sitemap: https://ctf-learner.github.io/baidusitemap.xml
+Sitemap: Sitemap: https://morio24.github.io/sitemap.xml
+Sitemap: Sitemap: https://morio24.github.io/baidusitemap.xml
